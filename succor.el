@@ -59,9 +59,12 @@
 (defadvice gtags-find-tag (around gtags-find-tag-after-hook)
   "Add hook."
   (let ((name (gtags-current-token))
-        (line (buffer-substring (line-beginning-position) (line-end-position))))
-    ad-do-it
-    (run-hook-with-args 'gtags-find-tag-after-hook name)))
+        (cur-buf (current-buffer))
+        (line (buffer-substring (line-beginning-position) (line-end-position)))
+        (ret     ad-do-it))
+    (if (equal cur-buf ret)
+        (message "tag not found")
+      (run-hook-with-args 'gtags-find-tag-after-hook name))))
 
 (defadvice gtags-pop-stack (around gtags-pop-stack-after-hook)
   "Add hook"
