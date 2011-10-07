@@ -11,13 +11,24 @@
   (interactive)
   (cond
    ((< (prefix-numeric-value arg) 0)
-    (setq succor-mode nil))
+    (setq succor-mode nil)
+    (ad-deactivate-regexp "gtags-find-tag-after-hook")
+    (ad-deactivate-regexp "gtags-pop-stack-after-hook")
+    )
    (arg
-    (setq succor-mode t))
+    (setq succor-mode t)
+    (ad-activate-regexp "gtags-find-tag-after-hook")
+    (ad-activate-regexp "gtags-pop-stack-after-hook")
+    )
    (t
+    (if succor-mode
+        (progn (ad-deactivate-regexp "gtags-find-tag-after-hook")
+               (ad-deactivate-regexp "gtags-pop-stack-after-hook"))
+      (progn (ad-activate-regexp "gtags-find-tag-after-hook")
+             (ad-activate-regexp "gtags-pop-stack-after-hook")))
     (setq succor-mode (not succor-mode))))
   (if succor-mode
-    nil))
+      nil))
 
 (defun succor-define-mode-map ()
   "キーマップ `succor-define-mode-map' を定義する。"
@@ -44,8 +55,6 @@
     ad-do-it
     (run-hook-with-args 'gtags-pop-stack-after-hook name)))
 
-(ad-activate-regexp "gtags-find-tag-after-hook")
-(ad-activate-regexp "gtags-pop-stack-after-hook")
 ;;(ad-disable-regexp  "gtags-find-tag-after-hook")
 
 (defun succor-pop-stack (args)
