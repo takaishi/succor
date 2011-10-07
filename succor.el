@@ -119,3 +119,4 @@
 
 (global-set-key (kbd "C-c C-r")'succor-capture)
 
+(provide 'succor)
