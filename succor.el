@@ -21,6 +21,8 @@
 
 (defun succor-pop-stack (args)
   "gtags-pop-stackで戻った関数のメモにジャンプする．メモに関数がまだ記録されていない場合は見出しを作成する"
+  (if (equal which-function-mode nil)
+      (which-function-mode t))
   (let* ((tag-name args)
          (source-buffer (buffer-name gtags-current-buffer))
          (line (which-function))
@@ -46,6 +48,8 @@
 
 (defun succor-find-tag (args)
   "gtags-find-tagで検索した関数のメモにジャンプする．メモに関数がまだ記録されていない場合は見出しを作成する"
+  (if (equal which-function-mode nil)
+      (which-function-mode t))
   (let* ((tag-name args)
          (source-buffer (buffer-name gtags-current-buffer))
          (line (buffer-substring (line-beginning-position) (line-end-position)))
