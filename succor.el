@@ -12,23 +12,27 @@
   (cond
    ((< (prefix-numeric-value arg) 0)
     (setq succor-mode nil)
-    (ad-deactivate-regexp "gtags-find-tag-after-hook")
-    (ad-deactivate-regexp "gtags-pop-stack-after-hook")
+    (succor-deactivate-advice)
     )
    (arg
     (setq succor-mode t)
-    (ad-activate-regexp "gtags-find-tag-after-hook")
-    (ad-activate-regexp "gtags-pop-stack-after-hook")
+    (succor-activate-advice)
     )
    (t
     (if succor-mode
-        (progn (ad-deactivate-regexp "gtags-find-tag-after-hook")
-               (ad-deactivate-regexp "gtags-pop-stack-after-hook"))
-      (progn (ad-activate-regexp "gtags-find-tag-after-hook")
-             (ad-activate-regexp "gtags-pop-stack-after-hook")))
+        (succor-deactivate-advice)
+      (succor-activate-advice))
     (setq succor-mode (not succor-mode))))
   (if succor-mode
       nil))
+
+(defun succor-activate-advice ()
+  (ad-activate-regexp "gtags-find-tag-after-hook")
+  (ad-activate-regexp "gtags-pop-stack-after-hook"))
+
+(defun succor-deactivate-advice ()
+  (ad-deactivate-regexp "gtags-find-tag-after-hook")
+  (ad-deactivate-regexp "gtags-pop-stack-after-hook"))
 
 (defun succor-define-mode-map ()
   "キーマップ `succor-define-mode-map' を定義する。"
@@ -147,7 +151,7 @@
          (org-capture-templates
           (if (string= "" tag-name)
               `(("r" "CodeReading" entry (file ,path ,tag-name)  "* %(identity prefix)%?\n   \n"))
-         `(("r" "CodeReading" entry (file+headline ,path ,tag-name)  "* %(identity prefix)%?\n   \n")))))
+            `(("r" "CodeReading" entry (file+headline ,path ,tag-name)  "* %(identity prefix)%?\n   \n")))))
     (setq succor-line-num (count-lines (point-min) (point)))
     (setq succor-link (org-store-link nil))
     (org-capture nil "r"))
