@@ -1,5 +1,9 @@
 (defvar succor-mode nil)
 (defvar succor-mode-map nil)
+(defvar *succor-directory* (expand-file-name "~/.succor/"))
+(defvar *succor-current-project* nil)
+(defvar *succor-work-directory* nil)
+(defvar *succor-file-extension* ".org")
 
 (if (not (assq 'succor-mode minor-mode-alist))
      (setq minot-mode-alist
@@ -21,14 +25,22 @@
    (t
     (if succor-mode
         (succor-deactivate-advice)
-      (succor-activate-advice))
+      (succor-initialize))
     (setq succor-mode (not succor-mode))))
   (if succor-mode
       nil))
 
-(defun succor-activate-advice ()
-  (ad-activate-regexp "gtags-find-tag-after-hook")
-  (ad-activate-regexp "gtags-pop-stack-after-hook"))
+(defun succor-initialize ()
+  (let* ((rootpath (gtags-get-rootpath))
+         (*succor-current-project*
+          (progn (string-match "^/.*/\\(.*\\)/$" rootpath)
+                 (match-string 1  rootpath))))
+    (setq *succor-work-directory*
+          (concat *succor-directory* *succor-current-project* "/"))
+    (unless (file-exists-p *succor-work-directory*)
+        (make-directory *succor-work-directory*))
+    (ad-activate-regexp "gtags-find-tag-after-hook")
+    (ad-activate-regexp "gtags-pop-stack-after-hook")))
 
 (defun succor-deactivate-advice ()
   (ad-deactivate-regexp "gtags-find-tag-after-hook")
@@ -42,8 +54,6 @@
           (cons (cons 'succor-mode succor-mode-map)
                 minor-mode-map-alist))))
 
-(defvar *succor-directory* (expand-file-name "~/.succor/"))
-(defvar *succor-file-extension* ".org")
 
 (defadvice gtags-find-tag (around gtags-find-tag-after-hook)
   "Add hook."
@@ -68,7 +78,7 @@
   (let* ((tag-name args)
          (source-buffer (buffer-name gtags-current-buffer))
          (line (which-function))
-         (path (concat *succor-directory*
+         (path (concat *succor-work-directory*
                        (if (string-match "\*.*\* (.*)\\(.*\\)<.*>" source-buffer)
                            (match-string 1 source-bufer)
                          source-buffer)
@@ -95,7 +105,7 @@
   (let* ((tag-name args)
          (source-buffer (buffer-name gtags-current-buffer))
          (line (buffer-substring (line-beginning-position) (line-end-position)))
-         (path (concat *succor-directory*
+         (path (concat *succor-work-directory*
                        (if (string-match "\*.*\* (.*)\\(.*\\)<.*>" source-buffer)
                            (match-string 1 source-bufer)
                          source-buffer)
