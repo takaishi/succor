@@ -1,3 +1,32 @@
+(defvar succor-mode nil)
+(defvar succor-mode-map nil)
+
+(if (not (assq 'succor-mode minor-mode-alist))
+     (setq minot-mode-alist
+           (cons '(succor-mode "Succor-mode")
+                 minor-mode-alist)))
+
+(defun succor-mode (&optional arg)
+  "succor-minor-mode"
+  (interactive)
+  (cond
+   ((< (prefix-numeric-value arg) 0)
+    (setq succor-mode nil))
+   (arg
+    (setq succor-mode t))
+   (t
+    (setq succor-mode (not succor-mode))))
+  (if succor-mode
+    nil))
+
+(defun succor-define-mode-map ()
+  "キーマップ `succor-define-mode-map' を定義する。"
+  (unless (keymapp succor-mode-map)
+    (setq succor-mode-map (make-sparse-keymap))
+    (setq minor-mode-map-alist
+          (cons (cons 'succor-mode succor-mode-map)
+                minor-mode-map-alist))))
+
 (defvar *succor-directory* (expand-file-name "~/.succor/"))
 (defvar *succor-file-extension* ".org")
 
@@ -121,6 +150,8 @@
   (org-entry-put (point) "LINE" (number-to-string succor-line-num))
   (org-entry-put (point) "TIME" (format-time-string "<%Y-%m-%d %a %H:%M:%S>" (current-time))))
 
-(global-set-key (kbd "C-c C-r")'succor-capture)
 
+
+(succor-define-mode-map)
+(define-key succor-mode-map "\C-c\C-r" 'succor-capture)
 (provide 'succor)
