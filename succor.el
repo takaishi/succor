@@ -117,7 +117,7 @@
       (switch-to-buffer-other-window note-buffer)
       ;; (with-current-buffer note-buffer
       (goto-char (point-min))
-      (when (equal (re-search-forward tag-name nil t) nil)
+      (when (equal (re-search-forward (concat tag-name "$") nil t) nil)
         (goto-char (point-max))
         (save-excursion
           (insert (concat "* " tag-name "\n"))
@@ -157,7 +157,7 @@
       (which-function-mode t))
   (let* ((prefix (succor-capture-get-prefix (substring (symbol-name major-mode) 0 -5)))
          (tag-name (or (which-function) ""))
-         (path (concat *succor-directory* (buffer-name (current-buffer)) *succor-file-extension*))
+         (path (concat *succor-work-directory* (buffer-name (current-buffer)) *succor-file-extension*))
          (org-capture-templates
           (if (string= "" tag-name)
               `(("r" "CodeReading" entry (file ,path ,tag-name)  "* %(identity prefix)%?\n   \n"))
