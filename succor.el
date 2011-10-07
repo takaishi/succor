@@ -4,6 +4,7 @@
 (defvar *succor-current-project* nil)
 (defvar *succor-work-directory* nil)
 (defvar *succor-file-extension* ".org")
+(defvar *succor-note-window* nil)
 
 (if (not (assq 'succor-mode minor-mode-alist))
      (setq minot-mode-alist
@@ -85,18 +86,22 @@
                        *succor-file-extension*))
          (buf (current-buffer))
          (note-buffer (find-file-noselect path))
-         (link (org-store-link nil)))
-    (save-selected-window
-      (switch-to-buffer-other-window note-buffer)
-      ;; (with-current-buffer note-buffer
-      (goto-char (point-min))
-      (when (equal (re-search-forward line nil t) nil)
-        (goto-char (point-max))
-        (save-excursion
-          (insert (concat "* " tag-name "\n"))
-          (org-entry-put (point) "LINK" link)
-          (org-entry-put (point) "TIME" (format-time-string "<%Y-%m-%d %a %H:%M:%S>" (current-time)))))
-      (recenter 0))))
+         (link (org-store-link nil))
+         (win (selected-window)))
+;;    (save-selected-window
+    (select-window *succor-note-window*)
+    (set-window-buffer (selected-window) note-buffer)
+    ;; (switch-to-buffer-other-window note-buffer)
+    ;; (with-current-buffer note-buffer
+    (goto-char (point-min))
+    (when (equal (re-search-forward line nil t) nil)
+      (goto-char (point-max))
+      (save-excursion
+        (insert (concat "* " tag-name "\n"))
+        (org-entry-put (point) "LINK" link)
+        (org-entry-put (point) "TIME" (format-time-string "<%Y-%m-%d %a %H:%M:%S>" (current-time)))))
+    (recenter 0)
+    (select-window win)))
 
 (defun succor-find-tag (args)
   "gtags-find-tagで検索した関数のメモにジャンプする．メモに関数がまだ記録されていない場合は見出しを作成する"
@@ -115,6 +120,7 @@
          (link (org-store-link nil)))
     (save-selected-window
       (switch-to-buffer-other-window note-buffer)
+      (setq *succor-note-window* (selected-window))
       ;; (with-current-buffer note-buffer
       (goto-char (point-min))
       (when (equal (re-search-forward (concat tag-name "$") nil t) nil)
