@@ -1,9 +1,15 @@
 (defvar succor-mode nil)
 (defvar succor-mode-map nil)
-(defvar *succor-directory* (expand-file-name "~/.succor/"))
+
+(defvar *succor-directory*
+  "ノートを保存するディレクトリ"
+  (expand-file-name "~/.succor/"))
+
 (defvar *succor-current-project* nil)
 (defvar *succor-work-directory* nil)
-(defvar *succor-file-extension* ".org")
+(defvar *succor-file-extension*
+  "ノートファイルが使う拡張子"
+  ".org")
 (defvar *succor-note-window* nil)
 
 (if (not (assq 'succor-mode minor-mode-alist))
@@ -17,12 +23,10 @@
   (cond
    ((< (prefix-numeric-value arg) 0)
     (setq succor-mode nil)
-    (succor-deactivate-advice)
-    )
+    (succor-deactivate-advice))
    (arg
     (setq succor-mode t)
-    (succor-activate-advice)
-    )
+    (succor-initiaize))
    (t
     (if succor-mode
         (succor-deactivate-advice)
@@ -73,7 +77,6 @@
     ad-do-it
     (run-hook-with-args 'gtags-pop-stack-after-hook name)))
 
-;;(ad-disable-regexp  "gtags-find-tag-after-hook")
 
 (defun succor-pop-stack (args)
   "gtags-pop-stackで戻った関数のメモにジャンプする．メモに関数がまだ記録されていない場合は見出しを作成する"
@@ -91,11 +94,8 @@
          (note-buffer (find-file-noselect path))
          (link (org-store-link nil))
          (win (selected-window)))
-;;    (save-selected-window
     (select-window *succor-note-window*)
     (set-window-buffer (selected-window) note-buffer)
-    ;; (switch-to-buffer-other-window note-buffer)
-    ;; (with-current-buffer note-buffer
     (goto-char (point-min))
     (when (equal (re-search-forward line nil t) nil)
       (goto-char (point-max))
@@ -124,7 +124,6 @@
     (save-selected-window
       (switch-to-buffer-other-window note-buffer)
       (setq *succor-note-window* (selected-window))
-      ;; (with-current-buffer note-buffer
       (goto-char (point-min))
       (when (equal (re-search-forward (concat tag-name "$") nil t) nil)
         (goto-char (point-max))
@@ -136,21 +135,6 @@
 
 (add-hook 'gtags-find-tag-after-hook 'succor-find-tag)
 (add-hook 'gtags-pop-stack-after-hook 'succor-pop-stack)
-
-
-;; (defun org-code-reading-lookup (&optional change-buffer?)
-;;   (interactive)
-;;   (let* ((func-name (which-function))
-;;         (path (concat "~/code-reading/" (buffer-name (current-buffer)) ".org"))
-;;         (buf (find-file-noselect path)))
-;;     (if (equal change-buffer? nil)
-;;         (progn (pop-to-buffer buf)
-;;                (goto-char (point-min))
-;;                (re-search-forward func-name nil t) nil)
-;;       (progn
-;;         (with-current-buffer buf
-;;           (re-search-forward func-name nil t))
-;;         (display-buffer buf)))))
 
 (defvar succor-link nil)
 (defvar succor-line-num nil)

@@ -1,0 +1,12 @@
+* 使い方
+
+gtags.elとOrg-modeに依存しています．
+
+: (add-to-list 'load-path "/path/to/succor")
+: (require 'succor)
+  
+gtagsが使える状況で M-x succor-mode を実行すると，succor-minor-modeが有効になります．
+
+gtags-find-tag，gtags-pop-stackを実行すると，ジャンプ先の関数用ノートが別ウィンドウに表示されます．
+
+: C-c C-r succor-capture, その行についてノートを記録します．
