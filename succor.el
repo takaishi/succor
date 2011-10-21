@@ -167,6 +167,37 @@
           (org-entry-put (point) "TIME" (format-time-string "<%Y-%m-%d %a %H:%M:%S>" (current-time)))))
       (recenter 0))))
 
+(defun succor-lookup ()
+  "現在の関数のノートを参照する"
+  (interactive)
+  (if (equal which-function-mode nil)
+      (which-function-mode t))
+  (let* ((tag-name (which-function))
+         (source-buffer (buffer-name gtags-current-buffer))
+         (line (buffer-substring (line-beginning-position) (line-end-position)))
+         (path (concat *succor-work-directory*
+                       (if (string-match "\*.*\* (.*)\\(.*\\)<.*>" source-buffer)
+                           (match-string 1 source-bufer)
+                         source-buffer)
+                       *succor-file-extension*))
+         (buf (current-buffer))
+         (note-buffer (find-file-noselect path))
+         (link (org-store-link nil)))
+    (succor-lookup-tag note-buffer tag-name link)))
+
+(defun succor-lookup-tag (buffer tag link)
+  (save-selected-window
+    (switch-to-buffer-other-window buffer)
+    (setq *succor-note-window* (selected-window))
+    (goto-char (point-min))
+    (when (equal (re-search-forward (concat tag "$") nil t) nil)
+      (goto-char (point-max))
+      (save-excursion
+        (insert (concat "* " tag "\n"))
+        (org-entry-put (point) "LINK" link)
+        (org-entry-put (point) "TIME" (format-time-string "<%Y-%m-%d %a %H:%M:%S>" (current-time)))))
+    (recenter 0)))
+
 (add-hook 'gtags-find-tag-after-hook 'succor-find-tag)
 (add-hook 'gtags-pop-stack-after-hook 'succor-pop-stack)
 (add-hook 'succor-imenu-after-jump-hook 'succor-imenu-jamp)
