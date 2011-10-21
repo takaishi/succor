@@ -2,13 +2,11 @@
 (defvar succor-mode-map nil)
 
 (defvar *succor-directory*
-  "ノートを保存するディレクトリ"
   (expand-file-name "~/.succor/"))
 
 (defvar *succor-current-project* nil)
 (defvar *succor-work-directory* nil)
 (defvar *succor-file-extension*
-  "ノートファイルが使う拡張子"
   ".org")
 (defvar *succor-note-window* nil)
 
@@ -133,8 +131,37 @@
           (org-entry-put (point) "TIME" (format-time-string "<%Y-%m-%d %a %H:%M:%S>" (current-time)))))
       (recenter 0))))
 
+(defun succor-imenu-jamp ()
+  "imenuでジャンプした関数のメモにジャンプする．メモに関数がまだ記録されていない場合は見出しを作成する"
+  (if (equal which-function-mode nil)
+      (which-function-mode t))
+  (let* ((tag-name (which-function))
+         (source-buffer (buffer-name gtags-current-buffer))
+         (line (buffer-substring (line-beginning-position) (line-end-position)))
+         (path (concat *succor-work-directory*
+                       (if (string-match "\*.*\* (.*)\\(.*\\)<.*>" source-buffer)
+                           (match-string 1 source-bufer)
+                         source-buffer)
+                       *succor-file-extension*))
+         (buf (current-buffer))
+         (note-buffer (find-file-noselect path))
+         (link (org-store-link nil)))
+    (save-selected-window
+      (switch-to-buffer-other-window note-buffer)
+      (setq *succor-note-window* (selected-window))
+      (goto-char (point-min))
+      (when (equal (re-search-forward (concat tag-name "$") nil t) nil)
+        (goto-char (point-max))
+        (save-excursion
+          (insert (concat "* " tag-name "\n"))
+          (org-entry-put (point) "LINK" link)
+          (org-entry-put (point) "TIME" (format-time-string "<%Y-%m-%d %a %H:%M:%S>" (current-time)))))
+      (recenter 0))))
+
 (add-hook 'gtags-find-tag-after-hook 'succor-find-tag)
 (add-hook 'gtags-pop-stack-after-hook 'succor-pop-stack)
+;;(remove-hook 'imenu-after-jump-hook 'succor-find-tag)             
+(add-hook 'imenu-after-jump-hook 'succor-imenu-jamp)
 
 (defvar succor-link nil)
 (defvar succor-line-num nil)
