@@ -9,6 +9,8 @@
 (defvar *succor-file-extension*
   ".org")
 (defvar *succor-note-window* nil)
+(defvar succor-gtags-enable t)
+(defvar succor-imenu-enable t)
 
 (if (not (assq 'succor-mode minor-mode-alist))
      (setq minot-mode-alist
@@ -42,12 +44,16 @@
           (concat *succor-directory* *succor-current-project* "/"))
     (unless (file-exists-p *succor-work-directory*)
         (make-directory *succor-work-directory*))
-    (ad-activate-regexp "gtags-find-tag-after-hook")
-    (ad-activate-regexp "gtags-pop-stack-after-hook")))
+    (when succor-gtags-enable
+      (ad-activate-regexp "gtags-find-tag-after-hook")
+      (ad-activate-regexp "gtags-pop-stack-after-hook"))
+    (when succor-imenu-enable
+      (ad-activate-regexp "succor-imenu-after-jump-hook"))))
 
 (defun succor-deactivate-advice ()
   (ad-deactivate-regexp "gtags-find-tag-after-hook")
-  (ad-deactivate-regexp "gtags-pop-stack-after-hook"))
+  (ad-deactivate-regexp "gtags-pop-stack-after-hook")
+  (ad-deactivate-regexp "succor-imenu-after-jump-hook"))
 
 (defun succor-define-mode-map ()
   "キーマップ `succor-define-mode-map' を定義する。"
@@ -75,6 +81,9 @@
     ad-do-it
     (run-hook-with-args 'gtags-pop-stack-after-hook name)))
 
+(defadvice imenu (after succor-imenu-after-jump-hook)
+  (run-hooks 'succor-imenu-after-jump-hook))
+                        
 
 (defun succor-pop-stack (args)
   "gtags-pop-stackで戻った関数のメモにジャンプする．メモに関数がまだ記録されていない場合は見出しを作成する"
@@ -160,8 +169,7 @@
 
 (add-hook 'gtags-find-tag-after-hook 'succor-find-tag)
 (add-hook 'gtags-pop-stack-after-hook 'succor-pop-stack)
-;;(remove-hook 'imenu-after-jump-hook 'succor-find-tag)             
-(add-hook 'imenu-after-jump-hook 'succor-imenu-jamp)
+(add-hook 'succor-imenu-after-jump-hook 'succor-imenu-jamp)
 
 (defvar succor-link nil)
 (defvar succor-line-num nil)
