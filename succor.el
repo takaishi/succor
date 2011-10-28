@@ -92,13 +92,21 @@
   (let* ((tag-name args)
          (source-buffer (buffer-name gtags-current-buffer))
          (line (which-function))
+         (dir (if (string-match (concat (gtags-get-rootpath)
+                                        "\\(.*\\)"
+                                        source-buffer)
+                                (buffer-file-name (current-buffer)))
+                  (match-string 1 (buffer-file-name (current-buffer)))))
          (path (concat *succor-work-directory*
+                       dir
                        (if (string-match "\*.*\* (.*)\\(.*\\)<.*>" source-buffer)
                            (match-string 1 source-bufer)
                          source-buffer)
                        *succor-file-extension*))
          (buf (current-buffer))
-         (note-buffer (find-file-noselect path))
+         (note-buffer (progn (unless (file-exists-p (concat *succor-work-directory* dir))
+                               (make-directory (concat *succor-work-directory* dir) t))
+                             (find-file-noselect path)))
          (link (org-store-link nil))
          (win (selected-window)))
     (select-window *succor-note-window*)
@@ -120,13 +128,21 @@
   (let* ((tag-name args)
          (source-buffer (buffer-name gtags-current-buffer))
          (line (buffer-substring (line-beginning-position) (line-end-position)))
+         (dir (if (string-match (concat (gtags-get-rootpath)
+                                        "\\(.*\\)"
+                                        source-buffer)
+                                (buffer-file-name (current-buffer)))
+                  (match-string 1 (buffer-file-name (current-buffer)))))
          (path (concat *succor-work-directory*
+                       dir
                        (if (string-match "\*.*\* (.*)\\(.*\\)<.*>" source-buffer)
                            (match-string 1 source-bufer)
                          source-buffer)
                        *succor-file-extension*))
          (buf (current-buffer))
-         (note-buffer (find-file-noselect path))
+         (note-buffer (progn (unless (file-exists-p (concat *succor-work-directory* dir))
+                               (make-directory (concat *succor-work-directory* dir) t))
+                             (find-file-noselect path)))
          (link (org-store-link nil)))
     (save-selected-window
       (switch-to-buffer-other-window note-buffer)
