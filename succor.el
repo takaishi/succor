@@ -1,13 +1,19 @@
 (defvar succor-mode nil)
 (defvar succor-mode-map nil)
 
-(defvar *succor-directory*
-  (expand-file-name "~/.succor/"))
+(defvar *succor-directory* (expand-file-name "~/.succor/")
+  "ノートを保存するディレクトリ")
 
-(defvar *succor-current-project* nil)
-(defvar *succor-work-directory* nil)
+(defvar *succor-current-project* nil
+  "現在読んでいるプロジェクト")
+
+(defvar *succor-work-directory* nil
+  "")
+
 (defvar *succor-file-extension*
-  ".org")
+  ".org"
+  "ノートファイルの拡張子")
+
 (defvar *succor-note-window* nil)
 (defvar succor-gtags-enable t)
 (defvar succor-imenu-enable t)
