@@ -48,13 +48,20 @@
                  (match-string 1  rootpath))))
     (setq *succor-work-directory*
           (concat *succor-directory* *succor-current-project* "/"))
-    (unless (file-exists-p *succor-work-directory*)
-        (make-directory *succor-work-directory*))
-    (when succor-gtags-enable
-      (ad-activate-regexp "gtags-find-tag-after-hook")
-      (ad-activate-regexp "gtags-pop-stack-after-hook"))
-    (when succor-imenu-enable
-      (ad-activate-regexp "succor-imenu-after-jump-hook"))))
+    (catch 'succor-start-p
+      (unless (file-exists-p *succor-work-directory*)
+        (if (y-or-n-p (format "No such directory %s.\nCreate new directory?" *succor-work-directory*))
+            (make-directory *succor-work-directory*)
+          (progn (succor-mode -1)
+                 (throw 'succor-start-p t))))
+      (succor-activate-advice))))
+
+(defun succor-activate-advice ()
+  (when succor-gtags-enable
+    (ad-activate-regexp "gtags-find-tag-after-hook")
+    (ad-activate-regexp "gtags-pop-stack-after-hook"))
+  (when succor-imenu-enable
+    (ad-activate-regexp "succor-imenu-after-jump-hook")))
 
 (defun succor-deactivate-advice ()
   (ad-deactivate-regexp "gtags-find-tag-after-hook")
@@ -69,7 +76,7 @@
           (cons (cons 'succor-mode succor-mode-map)
                 minor-mode-map-alist))))
 
-
+;;; Advice
 (defadvice gtags-find-tag (around gtags-find-tag-after-hook)
   "Add hook."
   (let ((name (gtags-current-token))
@@ -90,29 +97,14 @@
 (defadvice imenu (after succor-imenu-after-jump-hook)
   (run-hooks 'succor-imenu-after-jump-hook))
                         
-
+;;; Jump note with gtags, imenu,
 (defun succor-pop-stack (args)
   "gtags-pop-stackで戻った関数のメモにジャンプする．メモに関数がまだ記録されていない場合は見出しを作成する"
   (if (equal which-function-mode nil)
       (which-function-mode t))
   (let* ((tag-name args)
-         (source-buffer (buffer-name gtags-current-buffer))
          (line (which-function))
-         (dir (if (string-match (concat (gtags-get-rootpath)
-                                        "\\(.*\\)"
-                                        source-buffer)
-                                (buffer-file-name (current-buffer)))
-                  (match-string 1 (buffer-file-name (current-buffer)))))
-         (path (concat *succor-work-directory*
-                       dir
-                       (if (string-match "\*.*\* (.*)\\(.*\\)<.*>" source-buffer)
-                           (match-string 1 source-bufer)
-                         source-buffer)
-                       *succor-file-extension*))
-         (buf (current-buffer))
-         (note-buffer (progn (unless (file-exists-p (concat *succor-work-directory* dir))
-                               (make-directory (concat *succor-work-directory* dir) t))
-                             (find-file-noselect path)))
+         (note-buffer (succor-find-file gtags-current-buffer))
          (link (org-store-link nil))
          (win (selected-window)))
     (select-window *succor-note-window*)
@@ -127,28 +119,14 @@
     (recenter 0)
     (select-window win)))
 
+
 (defun succor-find-tag (args)
   "gtags-find-tagで検索した関数のメモにジャンプする．メモに関数がまだ記録されていない場合は見出しを作成する"
   (if (equal which-function-mode nil)
       (which-function-mode t))
   (let* ((tag-name args)
-         (source-buffer (buffer-name gtags-current-buffer))
          (line (buffer-substring (line-beginning-position) (line-end-position)))
-         (dir (if (string-match (concat (gtags-get-rootpath)
-                                        "\\(.*\\)"
-                                        source-buffer)
-                                (buffer-file-name (current-buffer)))
-                  (match-string 1 (buffer-file-name (current-buffer)))))
-         (path (concat *succor-work-directory*
-                       dir
-                       (if (string-match "\*.*\* (.*)\\(.*\\)<.*>" source-buffer)
-                           (match-string 1 source-bufer)
-                         source-buffer)
-                       *succor-file-extension*))
-         (buf (current-buffer))
-         (note-buffer (progn (unless (file-exists-p (concat *succor-work-directory* dir))
-                               (make-directory (concat *succor-work-directory* dir) t))
-                             (find-file-noselect path)))
+         (note-buffer (succor-find-file gtags-current-buffer))
          (link (org-store-link nil)))
     (save-selected-window
       (switch-to-buffer-other-window note-buffer)
@@ -161,6 +139,25 @@
           (org-entry-put (point) "LINK" link)
           (org-entry-put (point) "TIME" (format-time-string "<%Y-%m-%d %a %H:%M:%S>" (current-time)))))
       (recenter 0))))
+
+(defun succor-find-file (buf)
+  "ノートバッファを開き，そのバッファを返す．"
+  (let* ((source-buffer (buffer-name buf))
+        (dir (if (string-match (concat (gtags-get-rootpath)
+                                       "\\(.*\\)"
+                                       source-buffer)
+                               (buffer-file-name (current-buffer)))
+                 (match-string 1 (buffer-file-name (current-buffer)))))
+        (path (concat *succor-work-directory*
+                      dir
+                      (if (string-match "\*.*\* (.*)\\(.*\\)<.*>" source-buffer)
+                          (match-string 1 source-bufer)
+                        source-buffer)
+                      *succor-file-extension*))
+        (buf (current-buffer)))
+    (progn (unless (file-exists-p (concat *succor-work-directory* dir))
+             (make-directory (concat *succor-work-directory* dir) t))
+           (find-file-noselect path))))
 
 (defun succor-imenu-jamp ()
   "imenuでジャンプした関数のメモにジャンプする．メモに関数がまだ記録されていない場合は見出しを作成する"
@@ -224,6 +221,9 @@
 (add-hook 'gtags-pop-stack-after-hook 'succor-pop-stack)
 (add-hook 'succor-imenu-after-jump-hook 'succor-imenu-jamp)
 
+
+;;; Capture note
+
 (defvar succor-link nil)
 (defvar succor-line-num nil)
 (defun succor-capture-get-prefix (lang)
@@ -258,4 +258,5 @@
 
 (succor-define-mode-map)
 (define-key succor-mode-map "\C-c\C-r" 'succor-capture)
+(define-key succor-mode-map "\C-c\C-l" 'succor-lookup)
 (provide 'succor)
