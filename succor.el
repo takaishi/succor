@@ -14,10 +14,9 @@
   ".org"
   "ノートファイルの拡張子")
 
-(defvar succor-mark-ring nil)
 (defvar *succor-note-window* nil)
-(defvar succor-gtags-enable t)
-(defvar succor-imenu-enable t)
+(defvar succor-gtags-enable nil)
+(defvar succor-imenu-enable nil)
 
 (if (not (assq 'succor-mode minor-mode-alist))
      (setq minot-mode-alist
@@ -77,24 +76,9 @@
           (cons (cons 'succor-mode succor-mode-map)
                 minor-mode-map-alist))))
 
-(defun succor-mark ()
-  "カーソル位置をsuccor-mark-ringに追加する"
-  (let ((marker (cons (current-buffer) (point))))
-    (setq succor-mark-ring (cons marker succor-mark-ring))))
-
-(defun succor-pop-stack ()
-  "ジャンプ前の位置に戻る"
-  (interactive)
-  (let ((buf (caar succor-mark-ring))
-        (pos (cdar succor-mark-ring)))
-    (setq succor-mark-ring (cdr succor-mark-ring))
-    (switch-to-buffer-other-window buf)
-    (goto-char pos)))
-
 ;;; Advice
 (defadvice gtags-find-tag (around gtags-find-tag-after-hook)
   "Add hook."
-  (succor-mark)
   (let ((name (gtags-current-token))
         (cur-buf (current-buffer))
         (line (buffer-substring (line-beginning-position) (line-end-position)))
@@ -110,13 +94,11 @@
     ad-do-it
     (run-hook-with-args 'gtags-pop-stack-after-hook name)))
 
-(defadvice imenu (around succor-imenu-after-jump-hook)
-  (succor-mark)
-  ad-do-it
+(defadvice imenu (after succor-imenu-after-jump-hook)
   (run-hooks 'succor-imenu-after-jump-hook))
                         
 ;;; Jump note with gtags, imenu,
-(defun succor-pop-note (args)
+(defun succor-pop-stack (args)
   "gtags-pop-stackで戻った関数のメモにジャンプする．メモに関数がまだ記録されていない場合は見出しを作成する"
   (if (equal which-function-mode nil)
       (which-function-mode t))
@@ -138,7 +120,7 @@
     (select-window win)))
 
 
-(defun succor-find-note (args)
+(defun succor-find-tag (args)
   "gtags-find-tagで検索した関数のメモにジャンプする．メモに関数がまだ記録されていない場合は見出しを作成する"
   (if (equal which-function-mode nil)
       (which-function-mode t))
@@ -207,7 +189,6 @@
 (defun succor-lookup ()
   "現在の関数のノートを参照する"
   (interactive)
-  (succor-mark)
   (if (equal which-function-mode nil)
       (which-function-mode t))
   (let* ((tag-name (which-function))
@@ -236,12 +217,13 @@
         (org-entry-put (point) "TIME" (format-time-string "<%Y-%m-%d %a %H:%M:%S>" (current-time)))))
     (recenter 0)))
 
-(add-hook 'gtags-find-tag-after-hook 'succor-find-note)
-(add-hook 'gtags-pop-stack-after-hook 'succor-pop-note)
+(add-hook 'gtags-find-tag-after-hook 'succor-find-tag)
+(add-hook 'gtags-pop-stack-after-hook 'succor-pop-stack)
 (add-hook 'succor-imenu-after-jump-hook 'succor-imenu-jamp)
 
 
 ;;; Capture note
+
 (defvar succor-link nil)
 (defvar succor-line-num nil)
 (defun succor-capture-get-prefix (lang)
@@ -277,5 +259,4 @@
 (succor-define-mode-map)
 (define-key succor-mode-map "\C-c\C-r" 'succor-capture)
 (define-key succor-mode-map "\C-c\C-l" 'succor-lookup)
-(define-key succor-mode-map "\C-t" 'succor-pop-stack)
 (provide 'succor)
