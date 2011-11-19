@@ -16,8 +16,8 @@
 
 (defvar succor-mark-ring nil)
 (defvar *succor-note-window* nil)
-(defvar succor-gtags-enable t)
-(defvar succor-imenu-enable t)
+(defvar succor-gtags-enable nil)
+(defvar succor-imenu-enable nil)
 
 (if (not (assq 'succor-mode minor-mode-alist))
      (setq minot-mode-alist
