@@ -62,11 +62,13 @@
     (ad-activate-regexp "gtags-find-tag-after-hook")
     (ad-activate-regexp "gtags-pop-stack-after-hook"))
   (when succor-imenu-enable
+    (ad-activate-regexp "succor-after-set-mark-comamnd")
     (ad-activate-regexp "succor-imenu-after-jump-hook")))
 
 (defun succor-deactivate-advice ()
   (ad-deactivate-regexp "gtags-find-tag-after-hook")
   (ad-deactivate-regexp "gtags-pop-stack-after-hook")
+  (ad-deactivate-regexp "succor-after-set-mark-comamnd")
   (ad-deactivate-regexp "succor-imenu-after-jump-hook"))
 
 (defun succor-define-mode-map ()
@@ -109,6 +111,13 @@
         (line (buffer-substring (line-beginning-position) (line-end-position))))
     ad-do-it
     (run-hook-with-args 'gtags-pop-stack-after-hook name)))
+
+(defadvice set-mark-command (after succor-after-set-mark-comamnd)
+  (if arg
+      (let ((name (gtags-current-token))
+            (line (buffer-substring (line-beginning-position)
+                                    (line-end-position))))
+        (succor-pop-note name))))
 
 (defadvice imenu (around succor-imenu-after-jump-hook)
   (succor-mark)
