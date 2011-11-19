@@ -2,11 +2,37 @@
 
 gtags.elとOrg-modeに依存しています．
 
-: (add-to-list 'load-path "/path/to/succor")
-: (require 'succor)
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'load-path "/path/to/succor")
+  (require 'succor)
   
-gtagsが使える状況で M-x succor-mode を実行すると，succor-minor-modeが有効になります．
+  ;; ノートを保存するディレクトリ
+  (setq *succor-directory* "~/.succor/")
+  
+  ;; gtagsのジャンプと連携する
+  (setq succor-gtags-enable t)
+  
+  ;; imenuのジャンプと連携する
+  (setq succor-imenu-enable t)
+    
+#+END_SRC
 
-gtags-find-tag，gtags-pop-stackを実行すると，ジャンプ先の関数用ノートが別ウィンドウに表示されます．
+- succor-lookup
 
-: C-c C-r succor-capture, その行についてノートを記録します．
+  現在いる関数などのノートを別ウィンドウに表示します．
+
+- succor-capture
+
+  現在の行について，ノートを作成します．
+
+- imenu
+
+  succor-imenu-enableがtの場合，imenuのジャンプと連携して，ジャン
+  プ先のノートを同時に表示します．
+
+- gtags
+
+  succor-gtags-enableがtの場合，gtagsのジャンプと連携して，ジャン
+  プ先のノートを同時に表示します．
+
+
