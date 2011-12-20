@@ -99,7 +99,7 @@
     (goto-char pos)
     (which-function-mode t)
     (let* ((tag-name (or (which-function) ""))
-           (note-buffer (succor-find-file (current-buffer)))
+           (note-buffer (find-file-noselect (succor-get-note-path)))
            (link (org-store-link nil))
            (win (selected-window)))
       (select-window *succor-note-window*)
@@ -149,7 +149,7 @@
       (which-function-mode t))
   (let* ((tag-name args)
          (line (which-function))
-         (note-buffer (succor-find-file gtags-current-buffer))
+         (note-buffer (find-file-noselect (succor-get-note-path)))
          (link (org-store-link nil))
          (win (selected-window)))
     (select-window *succor-note-window*)
@@ -168,7 +168,7 @@
       (which-function-mode t))
   (let* ((tag-name args)
          (line (buffer-substring (line-beginning-position) (line-end-position)))
-         (note-buffer (succor-find-file gtags-current-buffer))
+         (note-buffer (find-file-noselect (succor-get-note-path)))
          (link (org-store-link nil)))
     (save-selected-window
       (switch-to-buffer-other-window note-buffer)
@@ -179,39 +179,12 @@
         (succor-insert-note tag-name link))
       (recenter 0))))
 
-(defun succor-find-file (buf)
-  "ノートバッファを開き，そのバッファを返す．"
-  (let* ((source-buffer (buffer-name buf))
-        (dir (if (string-match (concat (gtags-get-rootpath)
-                                       "\\(.*\\)"
-                                       source-buffer)
-                               (buffer-file-name (current-buffer)))
-                 (match-string 1 (buffer-file-name (current-buffer)))))
-        (path (concat *succor-work-directory*
-                      dir
-                      (if (string-match "\*.*\* (.*)\\(.*\\)<.*>" source-buffer)
-                          (match-string 1 source-bufer)
-                        source-buffer)
-                      *succor-file-extension*))
-        (buf (current-buffer)))
-    (progn (unless (file-exists-p (concat *succor-work-directory* dir))
-             (make-directory (concat *succor-work-directory* dir) t))
-           (find-file-noselect path))))
-
 (defun succor-imenu-jamp ()
   "imenuでジャンプした関数のメモにジャンプする．メモに関数がまだ記録されていない場合は見出しを作成する"
   (if (equal which-function-mode nil)
       (which-function-mode t))
   (let* ((tag-name (which-function))
-         (source-buffer (buffer-name gtags-current-buffer))
-         (line (buffer-substring (line-beginning-position) (line-end-position)))
-         (path (concat *succor-work-directory*
-                       (if (string-match "\*.*\* (.*)\\(.*\\)<.*>" source-buffer)
-                           (match-string 1 source-bufer)
-                         source-buffer)
-                       *succor-file-extension*))
-         (buf (current-buffer))
-         (note-buffer (find-file-noselect path))
+         (note-buffer (find-file-noselect (succor-get-note-path)))
          (link (org-store-link nil)))
     (save-selected-window
       (switch-to-buffer-other-window note-buffer)
@@ -226,24 +199,9 @@
   "現在の関数のノートを参照する"
   (interactive)
   (succor-mark)
-  (if (equal which-function-mode nil)
-      (which-function-mode t))
+  (which-function-mode t)
   (let* ((tag-name (which-function))
-         (source-buffer (buffer-name (current-buffer)))
-         (line (buffer-substring (line-beginning-position) (line-end-position)))
-         (dir (if (string-match (concat (gtags-get-rootpath)
-                                        "\\(.*\\)"
-                                        source-buffer)
-                                (buffer-file-name (current-buffer)))
-                  (match-string 1 (buffer-file-name (current-buffer)))))
-         (path (concat *succor-work-directory*
-                       dir
-                       (if (string-match "\*.*\* (.*)\\(.*\\)<.*>" source-buffer)
-                           (match-string 1 source-bufer)
-                         source-buffer)
-                       *succor-file-extension*))
-         (buf (current-buffer))
-         (note-buffer (find-file-noselect path))
+         (note-buffer (find-file-noselect (succor-get-note-path)))
          (link (org-store-link nil)))
     (succor-lookup-tag note-buffer tag-name link)))
 
@@ -256,6 +214,21 @@
       (goto-char (point-max))
       (succor-insert-note tag link))
     (recenter 0)))
+
+(defun succor-get-note-path ()
+  (let* ((source-buffer (buffer-name (current-buffer)))
+         (dir (if (string-match (concat (gtags-get-rootpath)
+                                        "\\(.*\\)"
+                                        source-buffer)
+                                (buffer-file-name (current-buffer)))
+                  (match-string 1 (buffer-file-name (current-buffer)))))
+         (path (concat *succor-work-directory*
+                       dir
+                       (if (string-match "\*.*\* (.*)\\(.*\\)<.*>" source-buffer)
+                           (match-string 1 source-bufer)
+                         source-buffer)
+                       *succor-file-extension*)))
+    path))
 
 (defun succor-insert-note (tag-name link)
   (save-excursion
