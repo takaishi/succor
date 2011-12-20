@@ -36,7 +36,7 @@
     (succor-initiaize))
    (t
     (if succor-mode
-        (succor-deactivate-advice)
+        (succor-exit)
       (succor-initialize))
     (setq succor-mode (not succor-mode))))
   (if succor-mode
@@ -55,7 +55,12 @@
             (make-directory *succor-work-directory*)
           (progn (succor-mode -1)
                  (throw 'succor-start-p t))))
-      (succor-activate-advice))))
+      (succor-activate-advice)
+      (message "succor-mode enabled"))))
+
+(defun succor-exit ()
+  (succor-deactivate-advice)
+  (message "succor-mode disabled"))
 
 (defun succor-activate-advice ()
   (when succor-gtags-enable
