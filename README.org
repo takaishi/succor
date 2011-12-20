@@ -1,6 +1,18 @@
-* 使い方
+* これは何？
+:PROPERTIES:
+:MTIME: 1324359067
+:MTIME-1: <2011-12-20 火 14:31:07>
+:END:
 
-gtags.elとOrg-modeに依存しています．
+コードリーディング技法「ひらメソッド」をサポートするelispです．
+
+* 使い方
+:PROPERTIES:
+:MTIME: 1324359121
+:MTIME-1: <2011-12-20 火 14:32:01>
+:END:
+
+gtags.elとorg-modeに依存しています．
 
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'load-path "/path/to/succor")
@@ -16,6 +28,12 @@ gtags.elとOrg-modeに依存しています．
   (setq succor-imenu-enable t)
     
 #+END_SRC
+
+* コマンド
+:PROPERTIES:
+:MTIME: 1324359121
+:MTIME-1: <2011-12-20 火 14:32:01>
+:END:
 
 - succor-lookup
 
@@ -35,4 +53,14 @@ gtags.elとOrg-modeに依存しています．
   succor-gtags-enableがtの場合，gtagsのジャンプと連携して，ジャン
   プ先のノートを同時に表示します．
 
+* キーバインド
+:PROPERTIES:
+:MTIME: 1324359142
+:MTIME-1: <2011-12-20 火 14:32:22>
+:END:
 
+| キー    | コマンド         |
+|---------+------------------|
+| C-c C-r | succor-capture   |
+| C-c C-l | succor-lookup    |
+| C-c C-t | succor-pop-stack |
