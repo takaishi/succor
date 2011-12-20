@@ -107,10 +107,7 @@
       (goto-char (point-min))
       (when (equal (re-search-forward tag-name nil t) nil)
         (goto-char (point-max))
-        (save-excursion
-          (insert (concat "* " tag-name "\n"))
-          (org-entry-put (point) "LINK" link)
-          (org-entry-put (point) "TIME" (format-time-string "<%Y-%m-%d %a %H:%M:%S>" (current-time)))))
+        (succor-insert-note tag-name link))
       (recenter 0)
       (select-window win))))
 
@@ -160,10 +157,7 @@
     (goto-char (point-min))
     (when (equal (re-search-forward line nil t) nil)
       (goto-char (point-max))
-      (save-excursion
-        (insert (concat "* " tag-name "\n"))
-        (org-entry-put (point) "LINK" link)
-        (org-entry-put (point) "TIME" (format-time-string "<%Y-%m-%d %a %H:%M:%S>" (current-time)))))
+      (succor-insert-note tag-name link))
     (recenter 0)
     (select-window win)))
 
@@ -182,10 +176,7 @@
       (goto-char (point-min))
       (when (equal (re-search-forward (concat tag-name "$") nil t) nil)
         (goto-char (point-max))
-        (save-excursion
-          (insert (concat "* " tag-name "\n"))
-          (org-entry-put (point) "LINK" link)
-          (org-entry-put (point) "TIME" (format-time-string "<%Y-%m-%d %a %H:%M:%S>" (current-time)))))
+        (succor-insert-note tag-name link))
       (recenter 0))))
 
 (defun succor-find-file (buf)
@@ -228,10 +219,7 @@
       (goto-char (point-min))
       (when (equal (re-search-forward (concat tag-name "$") nil t) nil)
         (goto-char (point-max))
-        (save-excursion
-          (insert (concat "* " tag-name "\n"))
-          (org-entry-put (point) "LINK" link)
-          (org-entry-put (point) "TIME" (format-time-string "<%Y-%m-%d %a %H:%M:%S>" (current-time)))))
+        (succor-insert-note tag-name link))
       (recenter 0))))
 
 (defun succor-lookup ()
@@ -266,11 +254,14 @@
     (goto-char (point-min))
     (when (equal (re-search-forward (concat tag "$") nil t) nil)
       (goto-char (point-max))
-      (save-excursion
-        (insert (concat "* " tag "\n"))
-        (org-entry-put (point) "LINK" link)
-        (org-entry-put (point) "TIME" (format-time-string "<%Y-%m-%d %a %H:%M:%S>" (current-time)))))
+      (succor-insert-note tag link))
     (recenter 0)))
+
+(defun succor-insert-note (tag-name link)
+  (save-excursion
+    (insert (concat "* " tag-name "\n"))
+    (org-entry-put (point) "LINK" link)
+    (org-entry-put (point) "TIME" (format-time-string "<%Y-%m-%d %a %H:%M:%S>" (current-time)))))
 
 (add-hook 'gtags-find-tag-after-hook 'succor-find-note)
 (add-hook 'gtags-pop-stack-after-hook 'succor-pop-note)
