@@ -313,5 +313,5 @@
 (succor-define-mode-map)
 (define-key succor-mode-map "\C-c\C-r" 'succor-capture)
 (define-key succor-mode-map "\C-c\C-l" 'succor-lookup)
-;;(define-key succor-mode-map "\C-c\C-t" 'succor-pop-stack)
+(define-key succor-mode-map "\C-c\C-t" 'succor-pop-stack)
 (provide 'succor)
