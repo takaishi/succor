@@ -256,7 +256,7 @@
       (which-function-mode t))
   (let* ((prefix (succor-capture-get-prefix (substring (symbol-name major-mode) 0 -5)))
          (tag-name (or (which-function) ""))
-         (path (concat *succor-work-directory* (buffer-name (current-buffer)) *succor-file-extension*))
+         (path (succor-get-note-path))
          (org-capture-templates
           (if (string= "" tag-name)
               `(("r" "CodeReading" entry (file ,path ,tag-name)  "* %(identity prefix)%?\n   \n"))
