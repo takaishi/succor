@@ -147,7 +147,7 @@
   "gtags-pop-stackで戻った関数のメモにジャンプする．メモに関数がまだ記録されていない場合は見出しを作成する"
   (if (equal which-function-mode nil)
       (which-function-mode t))
-  (let* ((tag-name args)
+  (let* ((tag-name (or (which-function) ""))
          (line (which-function))
          (note-buffer (find-file-noselect (succor-get-note-path)))
          (link (org-store-link nil))
