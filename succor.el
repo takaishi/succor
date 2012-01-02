@@ -216,7 +216,7 @@
     (recenter 0)))
 
 (defun succor-get-note-path ()
-  (let* ((source-buffer (buffer-name (current-buffer)))
+  (let* ((source-buffer (car (reverse (split-string (buffer-file-name (current-buffer)) "/"))))
          (dir (if (string-match (concat (gtags-get-rootpath)
                                         "\\(.*\\)"
                                         source-buffer)
@@ -228,6 +228,8 @@
                            (match-string 1 source-bufer)
                          source-buffer)
                        *succor-file-extension*)))
+    (unless (file-exists-p (file-name-directory path))
+        (make-directory (file-name-directory path)))
     path))
 
 (defun succor-insert-note (tag-name link)
