@@ -229,7 +229,7 @@
                          source-buffer)
                        *succor-file-extension*)))
     (unless (file-exists-p (file-name-directory path))
-        (make-directory (file-name-directory path)))
+        (make-directory (file-name-directory path) t))
     path))
 
 (defun succor-insert-note (tag-name link)
