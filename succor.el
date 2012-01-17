@@ -244,6 +244,7 @@
 
 
 ;;; Capture note
+;; Ported by http://d.hatena.ne.jp/rubikitch/20090121/1232468026
 (defvar succor-link nil)
 (defvar succor-line-num nil)
 (defun succor-capture-get-prefix (lang)
