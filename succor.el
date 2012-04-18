@@ -1,3 +1,6 @@
+
+(require 'gtags)
+
 (defvar succor-mode nil)
 (defvar succor-mode-map nil)
 
