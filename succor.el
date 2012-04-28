@@ -67,14 +67,14 @@
 
 (defun succor-activate-advice ()
   (when succor-gtags-enable
-    (ad-activate-regexp "gtags-find-tag-after-hook")
+    (ad-activate-regexp "gtags-select-it-after-hook")
     (ad-activate-regexp "gtags-pop-stack-after-hook"))
   (when succor-imenu-enable
     (ad-activate-regexp "succor-after-set-mark-comamnd")
     (ad-activate-regexp "succor-imenu-after-jump-hook")))
 
 (defun succor-deactivate-advice ()
-  (ad-deactivate-regexp "gtags-find-tag-after-hook")
+  (ad-deactivate-regexp "gtags-select-it-after-hook")
   (ad-deactivate-regexp "gtags-pop-stack-after-hook")
   (ad-deactivate-regexp "succor-after-set-mark-comamnd")
   (ad-deactivate-regexp "succor-imenu-after-jump-hook"))
@@ -115,7 +115,7 @@
       (select-window win))))
 
 ;;; Advice
-(defadvice gtags-find-tag (around gtags-find-tag-after-hook)
+(defadvice gtags-select-it (around gtags-select-it-after-hook)
   "Add hook."
   (succor-mark)
   (let ((name (gtags-current-token))
@@ -124,7 +124,7 @@
         (ret     ad-do-it))
     (if (equal cur-buf ret)
         (message "tag not found")
-      (run-hook-with-args 'gtags-find-tag-after-hook name))))
+      (run-hook-with-args 'gtags-select-it-after-hook name))))
 
 (defadvice gtags-pop-stack (around gtags-pop-stack-after-hook)
   "Add hook"
@@ -241,7 +241,7 @@
     (org-entry-put (point) "LINK" link)
     (org-entry-put (point) "TIME" (format-time-string "<%Y-%m-%d %a %H:%M:%S>" (current-time)))))
 
-(add-hook 'gtags-find-tag-after-hook 'succor-find-note)
+(add-hook 'gtags-select-it-after-hook 'succor-find-note)
 (add-hook 'gtags-pop-stack-after-hook 'succor-pop-note)
 (add-hook 'succor-imenu-after-jump-hook 'succor-imenu-jamp)
 
