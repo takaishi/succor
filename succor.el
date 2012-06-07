@@ -45,11 +45,14 @@
   (if succor-mode
       nil))
 
+(defun succor-get-current-project ()
+  (let* ((rootpath (gtags-get-rootpath))
+         (*succor-current-project* (first (reverse (split-string rootpath "/" t)))))
+	*succor-current-project*))
+  
 (defun succor-initialize ()
   (let* ((rootpath (gtags-get-rootpath))
-         (*succor-current-project*
-          (progn (string-match "^/.*/\\(.*\\)/$" rootpath)
-                 (match-string 1  rootpath))))
+         (*succor-current-project* (succor-get-current-project)))
     (setq *succor-work-directory*
           (concat *succor-directory* *succor-current-project* "/"))
     (catch 'succor-start-p
