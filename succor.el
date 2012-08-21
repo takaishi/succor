@@ -18,7 +18,7 @@
   "ノートファイルの拡張子")
 
 (defvar succor-mark-ring nil)
-(defvar *succor-note-window* nil)
+(defvar *succor-note-buffer* nil)
 (defvar succor-gtags-enable nil)
 (defvar succor-imenu-enable nil)
 
@@ -108,7 +108,7 @@
            (note-buffer (find-file-noselect (succor-get-note-path)))
            (link (org-store-link nil))
            (win (selected-window)))
-      (select-window *succor-note-window*)
+      (switch-to-buffer-other-window *succor-note-buffer*)
       (set-window-buffer (selected-window) note-buffer)
       (goto-char (point-min))
       (when (equal (re-search-forward tag-name nil t) nil)
@@ -158,7 +158,7 @@
          (note-buffer (find-file-noselect (succor-get-note-path)))
          (link (org-store-link nil))
          (win (selected-window)))
-    (select-window *succor-note-window*)
+    (switch-to-buffer-other-window *succor-note-buffer*)
     (set-window-buffer (selected-window) note-buffer)
     (goto-char (point-min))
     (when (equal (re-search-forward line nil t) nil)
@@ -178,7 +178,7 @@
          (link (org-store-link nil)))
     (save-selected-window
       (switch-to-buffer-other-window note-buffer)
-      (setq *succor-note-window* (selected-window))
+      (setq *succor-note-buffer* (current-buffer))
       (goto-char (point-min))
       (when (equal (re-search-forward (concat tag-name "$") nil t) nil)
         (goto-char (point-max))
@@ -194,7 +194,7 @@
          (link (org-store-link nil)))
     (save-selected-window
       (switch-to-buffer-other-window note-buffer)
-      (setq *succor-note-window* (selected-window))
+      (setq *succor-note-buffer* (current-buffer))
       (goto-char (point-min))
       (when (equal (re-search-forward (concat tag-name "$") nil t) nil)
         (goto-char (point-max))
@@ -214,7 +214,7 @@
 (defun succor-lookup-tag (buffer tag link)
   (save-selected-window
     (switch-to-buffer-other-window buffer)
-    (setq *succor-note-window* (selected-window))
+    (setq *succor-note-buffer* (current-buffer))
     (goto-char (point-min))
     (when (equal (re-search-forward (concat tag "$") nil t) nil)
       (goto-char (point-max))
@@ -288,3 +288,4 @@
 (define-key succor-mode-map "\C-c\C-l" 'succor-lookup)
 (define-key succor-mode-map "\C-c\C-t" 'succor-pop-stack)
 (provide 'succor)
+* bio_find_or_create_slab
