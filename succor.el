@@ -58,7 +58,7 @@
     (catch 'succor-start-p
       (unless (file-exists-p *succor-work-directory*)
         (if (y-or-n-p (format "No such directory %s.\nCreate new directory?" *succor-work-directory*))
-            (make-directory *succor-work-directory*)
+            (make-directory *succor-work-directory* t)
           (progn (succor-mode -1)
                  (throw 'succor-start-p t))))
       (succor-activate-advice)
