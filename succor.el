@@ -1,4 +1,3 @@
-
 (require 'gtags)
 
 (defvar succor-mode nil)
@@ -288,4 +287,3 @@
 (define-key succor-mode-map "\C-c\C-l" 'succor-lookup)
 (define-key succor-mode-map "\C-c\C-t" 'succor-pop-stack)
 (provide 'succor)
-* bio_find_or_create_slab
